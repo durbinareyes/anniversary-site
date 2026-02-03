@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{{ data.title }}</title>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+</head>
+<body>
+  <div class="bg-hearts"></div>
+
+  <main class="wrap">
+    <header class="hero card">
+      <div class="hero-left">
+        <p class="badge">4 months strong</p>
+        <h1>{{ data.name_a }} + {{ data.name_b }}</h1>
+        <p class="sub">
+          Since <span id="sinceText">{{ data.start_date }}</span> •
+          <span class="muted" id="daysTogether"></span>
+        </p>
+
+        <div class="btn-row">
+          <button class="btn" id="openLetter">Open love letter 💌</button>
+          <button class="btn ghost" id="confettiBtn">Celebrate 🎉</button>
+        </div>
+
+        <div class="countdowns">
+          <div class="countdown">
+            <p class="muted">Next monthiversary (every 2nd):</p>
+            <div class="count-grid">
+              <div class="count-box"><span id="mD">0</span><small>days</small></div>
+              <div class="count-box"><span id="mH">0</span><small>hours</small></div>
+              <div class="count-box"><span id="mM">0</span><small>mins</small></div>
+              <div class="count-box"><span id="mS">0</span><small>secs</small></div>
+            </div>
+            <p class="tiny muted">Next date: <span id="monthText"></span></p>
+          </div>
+
+          <div class="countdown">
+            <p class="muted">Countdown to 1 year:</p>
+            <div class="count-grid">
+              <div class="count-box"><span id="yD">0</span><small>days</small></div>
+              <div class="count-box"><span id="yH">0</span><small>hours</small></div>
+              <div class="count-box"><span id="yM">0</span><small>mins</small></div>
+              <div class="count-box"><span id="yS">0</span><small>secs</small></div>
+            </div>
+            <p class="tiny muted">1-year date: <span id="yearText"></span></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="polaroid">
+          <div class="polaroid-img" style="background-image:url('/static/img/{{ data.cover_photo }}');"></div>
+          <p class="polaroid-cap">Us 💖</p>
+        </div>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>Our 4-month story</h2>
+      <div class="timeline">
+        {% for t in data.timeline %}
+        <div class="t-item">
+          <div class="t-dot"></div>
+          <div class="t-body">
+            <h3>{{ t.label }}</h3>
+            <p>{{ t.text }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Photo moments</h2>
+      <p class="muted">Tap a photo for full view.</p>
+
+      <div class="gallery">
+        {% for p in data.photos %}
+          <button class="g-item" data-src="/static/img/{{ p }}" style="background-image:url('/static/img/{{ p }}');">
+            <span class="sr-only">Open photo</span>
+          </button>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Music</h2>
+      <p class="muted">Our song + our playlist.</p>
+
+      <h3 class="h3">Our Song 🎶</h3>
+      <div class="embed">
+        <iframe style="border-radius:16px"
+          src="{{ data.our_song }}"
+          width="100%" height="152" frameBorder="0" allowfullscreen=""
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture">
+        </iframe>
+      </div>
+
+      <div class="spacer"></div>
+
+      <h3 class="h3">Our Playlist 💖</h3>
+      <div class="embed">
+        <iframe style="border-radius:16px"
+          src="{{ data.playlist }}"
+          width="100%" height="152" frameBorder="0" allowfullscreen=""
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture">
+        </iframe>
+      </div>
+      <p class="tiny muted">To change the playlist later: edit <span class="code">data["playlist"]</span> in <span class="code">app.py</span>.</p>
+    </section>
+
+    <section class="card">
+      <h2>Guestbook</h2>
+      <p class="muted">Leave a note for each other (saved on this device/server).</p>
+
+      <form class="form" method="POST" action="/sign">
+        <input name="name" maxlength="30" placeholder="Your name (or leave blank)"/>
+        <textarea name="msg" maxlength="280" placeholder="Write something sweet..."></textarea>
+        <button class="btn" type="submit">Post ❤️</button>
+      </form>
+
+      <div class="notes">
+        {% for n in notes %}
+          <div class="note">
+            <div class="note-top">
+              <strong>{{ n[0] }}</strong>
+              <span class="muted tiny">{{ n[2] }}</span>
+            </div>
+            <p>{{ n[1] }}</p>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <footer class="foot muted tiny">
+      Made with love • {{ data.name_a }} & {{ data.name_b }}
+    </footer>
+  </main>
+
+  <!-- Love letter modal -->
+  <div class="modal" id="letterModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>Love Letter</h2>
+        <button class="x" id="closeLetter" aria-label="Close">✕</button>
+      </div>
+      <pre class="letter">{{ data.letter }}</pre>
+    </div>
+  </div>
+
+  <!-- Photo viewer modal -->
+  <div class="modal" id="photoModal" aria-hidden="true">
+    <div class="modal-card wide">
+      <div class="modal-head">
+        <h2>Photo</h2>
+        <button class="x" id="closePhoto" aria-label="Close">✕</button>
+      </div>
+      <img id="photoView" alt="Photo"/>
+    </div>
+  </div>
+
+  <script>
+    window.APP_DATA = {
+      start_date: "{{ data.start_date }}"
+    };
+  </script>
+  <script src="/static/js/main.js"></script>
+</body>
+</html>
